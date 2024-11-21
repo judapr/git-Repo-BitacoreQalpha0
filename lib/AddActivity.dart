@@ -3,17 +3,53 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AddActivity extends StatelessWidget {
+class AddActivity extends StatefulWidget {
+  const AddActivity({super.key});
+
+  @override
+  _AddActivityState createState() => _AddActivityState();
+}
+
+class _AddActivityState extends State<AddActivity> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
-  //final TextEditingController durationController = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
+  String?
+      selectedCategoryId; // Para almacenar el ID de la categoría seleccionada
+  List<Map<String, dynamic>> categories = []; // Para almacenar las categorías
+  bool isLoading =
+      true; // Para mostrar un cargador mientras obtenemos las categorías
 
-  AddActivity({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories(); // Llamar a esta función para cargar las categorías
+  }
+
+  // Cargar categorías desde Firestore
+  void _loadCategories() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection("categories").get();
+
+      setState(() {
+        categories = snapshot.docs
+            .map((doc) => {
+                  "id": doc.id, // Guardamos el ID de la categoría
+                  "name": doc["name"], // Guardamos el nombre de la categoría
+                })
+            .toList();
+        isLoading =
+            false; // Deja de mostrar el cargador cuando se termine de cargar
+      });
+    } catch (e) {
+      _showErrorSnackBar(context, 'Error al cargar las categorías: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +91,7 @@ class AddActivity extends StatelessWidget {
                     _buildTextField("Título*", titleController),
                     _buildDatePicker(context),
                     _buildTimePicker(context),
-                    //_buildTextField("Duración", durationController),
-                    _buildTextField("Categoría", categoryController),
+                    _buildCategoryDropdown(), // Agregar el Dropdown para la categoría
                     const SizedBox(height: 16),
                     const Text(
                       "Descripción",
@@ -96,7 +131,6 @@ class AddActivity extends StatelessWidget {
             Padding(
               padding:
                   const EdgeInsets.all(15.0), // Espacio alrededor del botón
-
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: Row(
@@ -109,9 +143,7 @@ class AddActivity extends StatelessWidget {
                       label: const Text("Guardar Actividad"),
                       icon: const Icon(Icons.save),
                       style: ElevatedButton.styleFrom(
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                        ),
+                        textStyle: const TextStyle(fontSize: 14),
                         padding: const EdgeInsets.symmetric(
                             vertical: 16, horizontal: 24),
                         foregroundColor: Colors.white,
@@ -129,6 +161,38 @@ class AddActivity extends StatelessWidget {
         ));
   }
 
+  // Widget para mostrar el Dropdown de categorías
+  Widget _buildCategoryDropdown() {
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                hint: const Text("Seleccionar Categoría"),
+                value: selectedCategoryId, // Usamos el ID de la categoría aquí
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCategoryId = newValue; // Guardamos el ID
+                  });
+                },
+                items: categories.map<DropdownMenuItem<String>>((category) {
+                  return DropdownMenuItem<String>(
+                    value: category["id"], // Usamos el ID de la categoría
+                    child: Text(category["name"]), // Mostramos el nombre
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+  }
+
+  // Widget de campo de texto
   Widget _buildTextField(String label, TextEditingController controller,
       {int maxLines = 1}) {
     return Padding(
@@ -144,6 +208,7 @@ class AddActivity extends StatelessWidget {
     );
   }
 
+  // Método para seleccionar la fecha
   Widget _buildDatePicker(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -168,10 +233,13 @@ class AddActivity extends StatelessWidget {
     );
 
     if (pickedDate != null && pickedDate != selectedDate) {
-      selectedDate = pickedDate;
+      setState(() {
+        selectedDate = pickedDate;
+      });
     }
   }
 
+  // Método para seleccionar la hora
   Widget _buildTimePicker(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -190,12 +258,14 @@ class AddActivity extends StatelessWidget {
     );
 
     if (pickedTime != null) {
-      // Formato de hora
       String formattedTime = pickedTime.format(context);
-      timeController.text = formattedTime;
+      setState(() {
+        timeController.text = formattedTime;
+      });
     }
   }
 
+  // Guardar la actividad en Firestore
   void _saveActivity(BuildContext context) async {
     // Validar campos obligatorios
     if (titleController.text.isEmpty) {
@@ -205,6 +275,11 @@ class AddActivity extends StatelessWidget {
 
     if (timeController.text.isEmpty) {
       _showErrorSnackBar(context, 'La hora es obligatoria.');
+      return;
+    }
+
+    if (selectedCategoryId == null) {
+      _showErrorSnackBar(context, 'La categoría es obligatoria.');
       return;
     }
 
@@ -225,90 +300,61 @@ class AddActivity extends StatelessWidget {
         timeOfDay = timeOfDay.replacing(hour: 0);
       }
 
-      String timeText =
-          "${timeOfDay.hour.toString().padLeft(2, '0')}:${timeOfDay.minute.toString().padLeft(2, '0')}";
-
-      // Formar el DateTime
-      String dateTimeString = "$dateText $timeText";
-      DateTime combinedDateTime = DateTime.parse(dateTimeString);
-
-      // Obtener UID del usuario actual
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        _showErrorSnackBar(context, 'Usuario no autenticado.');
-        return;
-      }
-
-      // Preparar datos de la actividad
-      Map<String, dynamic> activityData = {
-        "title": titleController.text,
-        "category": categoryController.text,
-        "description": descriptionController.text,
-        "notes": notesController.text,
-        "date_time": combinedDateTime.toIso8601String(), // Guardar como ISO8601
-        "done_by": user.uid, // UID del usuario actual
-        "created_at": FieldValue.serverTimestamp(), // Marca de tiempo
-      };
-
-      // Guardar en Firestore
-      await FirebaseFirestore.instance
-          .collection("activities")
-          .add(activityData);
-
-      /*
-      // Mostrar mensaje de éxito
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Actividad guardada: ${titleController.text}')),
-      );*/
-
-      // Mostrar mensaje de éxito en un popup (Dialog)
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text("Actividad Guardada"),
-            content: const Text("La actividad se ha guardado exitosamente."),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () {
-                  // Cerrar el popup
-                  Navigator.of(context).pop();
-
-                  // Regresar a la vista de actividades (puedes reemplazar esto con tu ruta específica)
-                  Navigator.pop(context); // Regresa a la pantalla anterior
-                },
-              ),
-            ],
-          );
-        },
+      DateTime finalDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        timeOfDay.hour,
+        timeOfDay.minute,
       );
 
-      // Limpiar los campos
-      titleController.clear();
-      categoryController.clear();
-      descriptionController.clear();
-      notesController.clear();
-      timeController.clear();
+      // Guardar en Firestore
+      FirebaseFirestore.instance.collection("activities").add({
+        "title": titleController.text,
+        "description": descriptionController.text,
+        "notes": notesController.text,
+        "category_id": selectedCategoryId,
+        "date_time": finalDateTime,
+        "created_at": FieldValue.serverTimestamp(),
+        "user_id": FirebaseAuth.instance.currentUser!.uid,
+      });
+
+      Navigator.pop(context); // Volver a la pantalla de actividades
+
+      // Mostrar mensaje de éxito
+      _showSuccessSnackBar(context, 'Actividad guardada con éxito.');
     } catch (e) {
       _showErrorSnackBar(context, 'Error al guardar la actividad: $e');
     }
   }
 
+  // Mostrar mensaje de error
   void _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
   }
 
+  // Mostrar mensaje de éxito
+  void _showSuccessSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
+    );
+  }
+
+  // Placeholder de imagen
   Widget _buildImagePlaceholder() {
     return Container(
-      width: 165,
-      height: 165,
-      color: Colors.grey[300],
-      child: IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.add, color: Colors.grey),
+      height: 100,
+      width: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.grey[300],
+      ),
+      child: const Icon(
+        Icons.add_a_photo,
+        size: 50,
+        color: Colors.grey,
       ),
     );
   }
