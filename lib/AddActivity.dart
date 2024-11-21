@@ -1,12 +1,15 @@
 import 'MainAppBar.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AddActivity extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
-  final TextEditingController durationController = TextEditingController();
+  //final TextEditingController durationController = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
 
@@ -44,7 +47,7 @@ class AddActivity extends StatelessWidget {
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const Text(
-                      "Sólo Nombre y Fecha son campos Obligatorios",
+                      "Nombre, Fecha y Hora son obligatorias.",
                       style:
                           TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
                     ),
@@ -52,7 +55,7 @@ class AddActivity extends StatelessWidget {
                     _buildTextField("Título*", titleController),
                     _buildDatePicker(context),
                     _buildTimePicker(context),
-                    _buildTextField("Duración", durationController),
+                    //_buildTextField("Duración", durationController),
                     _buildTextField("Categoría", categoryController),
                     const SizedBox(height: 16),
                     const Text(
@@ -76,6 +79,14 @@ class AddActivity extends StatelessWidget {
                         const SizedBox(width: 8),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Notas",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildTextField("Notas", notesController, maxLines: 4),
                     // Agrega un espacio en blanco debajo del contenido
                     const SizedBox(height: 65), // Altura del espacio en blanco
                   ],
@@ -167,7 +178,7 @@ class AddActivity extends StatelessWidget {
         _selectTime(context);
       },
       child: AbsorbPointer(
-        child: _buildTextField("Hora", timeController),
+        child: _buildTextField("Hora*", timeController),
       ),
     );
   }
@@ -185,38 +196,103 @@ class AddActivity extends StatelessWidget {
     }
   }
 
-  void _saveActivity(BuildContext context) {
+  void _saveActivity(BuildContext context) async {
     // Validar campos obligatorios
     if (titleController.text.isEmpty) {
       _showErrorSnackBar(context, 'El título es obligatorio.');
       return;
     }
 
-    if (timeController.text.isEmpty && selectedDate == DateTime.now()) {
-      _showErrorSnackBar(context, 'La fecha es obligatoria.');
+    if (timeController.text.isEmpty) {
+      _showErrorSnackBar(context, 'La hora es obligatoria.');
       return;
     }
 
-    // Aquí puedes agregar la lógica para guardar la actividad
-    String title = titleController.text;
-    String category = categoryController.text;
-    String description = descriptionController.text;
-    String time = timeController.text;
-    String date =
-        "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"; // Formato de fecha
-    String duration = durationController.text;
+    try {
+      // Combinar fecha y hora
+      String dateText =
+          "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
-    // Mostrar un mensaje de éxito
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Actividad guardada: $title')),
-    );
+      // Convertir la hora al formato 24 horas
+      var timeOfDay = TimeOfDay(
+        hour: int.parse(timeController.text.split(":")[0]),
+        minute: int.parse(timeController.text.split(":")[1].split(" ")[0]),
+      );
 
-    // Limpiar los campos (opcional)
-    titleController.clear();
-    categoryController.clear();
-    descriptionController.clear();
-    timeController.clear();
-    durationController.clear();
+      if (timeController.text.contains("PM") && timeOfDay.hour < 12) {
+        timeOfDay = timeOfDay.replacing(hour: timeOfDay.hour + 12);
+      } else if (timeController.text.contains("AM") && timeOfDay.hour == 12) {
+        timeOfDay = timeOfDay.replacing(hour: 0);
+      }
+
+      String timeText =
+          "${timeOfDay.hour.toString().padLeft(2, '0')}:${timeOfDay.minute.toString().padLeft(2, '0')}";
+
+      // Formar el DateTime
+      String dateTimeString = "$dateText $timeText";
+      DateTime combinedDateTime = DateTime.parse(dateTimeString);
+
+      // Obtener UID del usuario actual
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _showErrorSnackBar(context, 'Usuario no autenticado.');
+        return;
+      }
+
+      // Preparar datos de la actividad
+      Map<String, dynamic> activityData = {
+        "title": titleController.text,
+        "category": categoryController.text,
+        "description": descriptionController.text,
+        "notes": notesController.text,
+        "date_time": combinedDateTime.toIso8601String(), // Guardar como ISO8601
+        "done_by": user.uid, // UID del usuario actual
+        "created_at": FieldValue.serverTimestamp(), // Marca de tiempo
+      };
+
+      // Guardar en Firestore
+      await FirebaseFirestore.instance
+          .collection("activities")
+          .add(activityData);
+
+      /*
+      // Mostrar mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Actividad guardada: ${titleController.text}')),
+      );*/
+
+      // Mostrar mensaje de éxito en un popup (Dialog)
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Actividad Guardada"),
+            content: const Text("La actividad se ha guardado exitosamente."),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("OK"),
+                onPressed: () {
+                  // Cerrar el popup
+                  Navigator.of(context).pop();
+
+                  // Regresar a la vista de actividades (puedes reemplazar esto con tu ruta específica)
+                  Navigator.pop(context); // Regresa a la pantalla anterior
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      // Limpiar los campos
+      titleController.clear();
+      categoryController.clear();
+      descriptionController.clear();
+      notesController.clear();
+      timeController.clear();
+    } catch (e) {
+      _showErrorSnackBar(context, 'Error al guardar la actividad: $e');
+    }
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
