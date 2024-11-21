@@ -5,35 +5,45 @@ import 'firebase_options.dart';
 import 'ActivityScreen.dart';
 import 'LoginScreen.dart';
 import 'RegisterScreen.dart';
+import 'authGuard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // Escucha los cambios en el estado de autenticación
-  FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    runApp(MyApp(
-        user: user)); // Pasa el usuario autenticado (si existe) a la aplicación
-  });
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final User? user;
-
-  const MyApp({super.key, this.user});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: user == null
-          ? '/login'
-          : '/activity', // Redirige según el estado de autenticación
+      // Usamos un StreamBuilder para cambiar dinámicamente entre pantallas
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Muestra un indicador de carga mientras se verifica el estado de autenticación
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Si el usuario está autenticado, muestra la pantalla de actividades
+          if (snapshot.hasData) {
+            return const AuthGuard(child: ActivityScreen());
+          }
+
+          // Si no está autenticado, muestra la pantalla de inicio de sesión
+          return const LoginScreen();
+        },
+      ),
       routes: {
-        '/login': (context) => LoginScreen(),
-        '/register': (context) => RegisterScreen(),
-        '/activity': (context) => const ActivityScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/activity': (context) =>
+            const AuthGuard(child: ActivityScreen()), // Protección
       },
     );
   }
