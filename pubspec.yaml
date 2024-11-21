@@ -1,0 +1,30 @@
+name: bitacoreqalpha0
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.3
+  cloud_firestore: ^5.5.0
+  font_awesome_flutter: ^10.3.0
+  intl: ^0.17.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  
+
+flutter:
+  uses-material-design: true
+  assets: 
+    - assets/login/logoBQLogin.jpg
+
+
+

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "314805774101",
+    "project_id": "bitacoreqalpha0",
+    "storage_bucket": "bitacoreqalpha0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:314805774101:android:37e744fe6dd013855c6b1c",
+        "android_client_info": {
+          "package_name": "com.example.bitacoreqalpha0"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWtQq7Wy9COti0xYP8K7BzPEehasw47Qo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
