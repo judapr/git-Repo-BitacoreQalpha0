@@ -8,6 +8,8 @@ import 'RegisterScreen.dart';
 import 'authGuard.dart';
 import 'onboarding.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
