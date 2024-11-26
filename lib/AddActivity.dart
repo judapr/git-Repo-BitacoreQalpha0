@@ -4,6 +4,7 @@ import 'MainAppBar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'AddCategory.dart';
 
 class AddActivity extends StatefulWidget {
   const AddActivity({super.key});
@@ -33,10 +34,15 @@ class _AddActivityState extends State<AddActivity> {
   }
 
   // Cargar categorías desde Firestore
+  // Cargar categorías desde Firestore filtradas por el usuario logueado
   void _loadCategories() async {
     try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection("categories").get();
+      final userId = FirebaseAuth
+          .instance.currentUser!.uid; // Obtener el ID del usuario actual
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection("categories")
+          .where("user_uid", isEqualTo: userId) // Filtrar por usuario
+          .get();
 
       setState(() {
         categories = snapshot.docs
@@ -177,18 +183,49 @@ class _AddActivityState extends State<AddActivity> {
               child: DropdownButton<String>(
                 isExpanded: true,
                 hint: const Text("Seleccionar Categoría"),
-                value: selectedCategoryId, // Usamos el ID de la categoría aquí
+                value: selectedCategoryId,
                 onChanged: (String? newValue) {
-                  setState(() {
-                    selectedCategoryId = newValue; // Guardamos el ID
-                  });
+                  if (newValue == 'add_new') {
+                    // Navegar a AddCategory cuando el usuario elija "Agregar Nueva Categoría"
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddCategory()),
+                    ).then((_) {
+                      // Volver a cargar categorías después de regresar
+                      _loadCategories();
+                    });
+                  } else {
+                    setState(() {
+                      selectedCategoryId = newValue;
+                    });
+                  }
                 },
-                items: categories.map<DropdownMenuItem<String>>((category) {
-                  return DropdownMenuItem<String>(
-                    value: category["id"], // Usamos el ID de la categoría
-                    child: Text(category["name"]), // Mostramos el nombre
-                  );
-                }).toList(),
+                items: [
+                  // Generar las categorías existentes como ítems del dropdown
+                  ...categories.map<DropdownMenuItem<String>>((category) {
+                    return DropdownMenuItem<String>(
+                      value: category["id"],
+                      child: Text(category["name"]),
+                    );
+                  }).toList(),
+                  // Agregar un ítem especial para "Agregar Nueva Categoría"
+                  const DropdownMenuItem<String>(
+                    value: 'add_new',
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: Color.fromARGB(255, 0, 0, 0)),
+                        SizedBox(width: 8),
+                        Text(
+                          "Agregar Nueva Categoría",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            //fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );

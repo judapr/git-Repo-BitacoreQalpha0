@@ -34,7 +34,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
           },
           children: [
             Container(
-              color: const Color.fromARGB(255, 194, 196, 199),
+              color: const Color.fromARGB(255, 255, 255, 255),
               child: const Center(
                 child: Column(
                   mainAxisSize:
@@ -74,7 +74,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
               ),
             ),
             Container(
-              color: const Color.fromARGB(255, 194, 196, 199),
+              color: const Color.fromARGB(255, 255, 255, 255),
               child: const Center(
                 child: Column(
                   mainAxisSize:
@@ -114,7 +114,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
               ),
             ),
             Container(
-              color: const Color.fromARGB(255, 194, 196, 199),
+              color: const Color.fromARGB(255, 255, 255, 255),
               child: Center(
                 child: Column(
                   mainAxisSize:
@@ -190,6 +190,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
         ),
       ),
       bottomSheet: Container(
+        color: const Color.fromARGB(255, 255, 255, 255),
         padding: const EdgeInsets.symmetric(
           horizontal: 40,
         ),
