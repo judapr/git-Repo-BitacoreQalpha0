@@ -1,3 +1,5 @@
+//TODO: hacer que la lista deslizable tenga una opción para agregar una categoría y la envíe a la página de guardar actividad
+//TODO: mostrar las actividades guardadas
 import 'MainAppBar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

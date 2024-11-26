@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AuthGuard extends StatelessWidget {
   final Widget child;
 
-  const AuthGuard({required this.child, Key? key}) : super(key: key);
+  const AuthGuard({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {

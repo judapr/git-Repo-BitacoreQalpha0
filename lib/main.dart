@@ -1,18 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'ActivityScreen.dart';
 import 'LoginScreen.dart';
 import 'RegisterScreen.dart';
 import 'authGuard.dart';
+import 'onboarding.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(const MyApp()); // No necesitamos pasar 'hasSeenOnboarding' aquí
 }
 
 class MyApp extends StatelessWidget {
@@ -35,8 +38,8 @@ class MyApp extends StatelessWidget {
             return const AuthGuard(child: ActivityScreen());
           }
 
-          // Si no está autenticado, muestra la pantalla de inicio de sesión
-          return const LoginScreen();
+          // Si el usuario no está autenticado, muestra el onboarding
+          return const MyOnboarding(); // Siempre muestra el onboarding si no está autenticado
         },
       ),
       routes: {

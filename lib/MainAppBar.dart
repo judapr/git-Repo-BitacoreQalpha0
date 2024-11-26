@@ -34,7 +34,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddActivity()),
+                    MaterialPageRoute(
+                        builder: (context) => const AddActivity()),
                   );
                 },
                 label: Text(buttonText), // Usa el texto del botón
