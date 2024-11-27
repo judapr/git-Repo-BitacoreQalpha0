@@ -13,10 +13,11 @@ dependencies:
   firebase_auth: ^5.3.3
   cloud_firestore: ^5.5.0
   font_awesome_flutter: ^10.3.0
-  intl: ^0.17.0
+  intl: ^0.18.1
   cupertino_icons: ^1.0.8
   smooth_page_indicator: ^1.2.0+3
   shared_preferences: ^2.1.0
+
 
 dev_dependencies:
   flutter_test:

@@ -6,9 +6,9 @@ class ActivityCard extends StatelessWidget {
   final String category;
   final String description;
   final String time;
-  //final String date;
   final DateTime date;
-  final String duration;
+  final String notes;
+  final String activityId; // ID de la actividad en Firebase
 
   const ActivityCard({
     super.key,
@@ -17,7 +17,8 @@ class ActivityCard extends StatelessWidget {
     required this.description,
     required this.time,
     required this.date,
-    required this.duration,
+    required this.notes,
+    required this.activityId, // Recibir el ID de la actividad
   });
 
   @override
@@ -33,7 +34,9 @@ class ActivityCard extends StatelessWidget {
               description: description,
               time: time,
               date: date,
-              duration: duration,
+              notes: notes,
+              activityId:
+                  activityId, // Pasamos el activityId aquí para la edición
             ),
           ),
         );
@@ -58,7 +61,9 @@ class ActivityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description,
+                      description.isEmpty
+                          ? "No hay descripción disponible"
+                          : description,
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],

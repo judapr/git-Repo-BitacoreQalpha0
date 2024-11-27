@@ -358,7 +358,8 @@ class _AddActivityState extends State<AddActivity> {
         "user_id": FirebaseAuth.instance.currentUser!.uid,
       });
 
-      Navigator.pop(context); // Volver a la pantalla de actividades
+      // Volver a la pantalla anterior e indicar éxito
+      Navigator.pop(context, true); // Cambiado para notificar éxito
 
       // Mostrar mensaje de éxito
       _showSuccessSnackBar(context, 'Actividad guardada con éxito.');

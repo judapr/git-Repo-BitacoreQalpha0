@@ -31,12 +31,20 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (showAddActivityButton) // Muestra el botón solo si showButton es verdadero
               ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  // Navegar a AddActivity y esperar su resultado
+                  bool? result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const AddActivity()),
                   );
+
+                  // Si el resultado es true, actualizar las actividades en ActivityScreen
+                  if (result == true) {
+                    // Buscar el estado de la pantalla ActivityScreen y refrescar la lista de actividades
+                    // Este paso depende de cómo estructures tu flujo de datos.
+                    // Podrías usar un estado compartido o un callback si es necesario.
+                  }
                 },
                 label: Text(buttonText), // Usa el texto del botón
                 style: ElevatedButton.styleFrom(

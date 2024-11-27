@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'MainAppBar.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,8 @@ class EditActivity extends StatelessWidget {
   final TextEditingController descriptionController;
   final TextEditingController timeController;
   DateTime selectedDate;
-  final TextEditingController durationController;
+  final TextEditingController notesController;
+  final String activityId; // ID del documento de la actividad a editar
 
   EditActivity({
     super.key,
@@ -16,12 +18,13 @@ class EditActivity extends StatelessWidget {
     required String description,
     required String time,
     required DateTime date,
-    required String duration,
+    required String notes,
+    required this.activityId, // Recibir el ID de la actividad
   })  : titleController = TextEditingController(text: title),
         categoryController = TextEditingController(text: category),
         descriptionController = TextEditingController(text: description),
         timeController = TextEditingController(text: time),
-        durationController = TextEditingController(text: duration),
+        notesController = TextEditingController(text: notes),
         selectedDate = date;
 
   @override
@@ -58,7 +61,7 @@ class EditActivity extends StatelessWidget {
                   _buildTextField("Título*", titleController),
                   _buildDatePicker(context),
                   _buildTimePicker(context),
-                  _buildTextField("Duración", durationController),
+
                   _buildTextField("Categoría", categoryController),
                   const SizedBox(height: 16),
                   const Text(
@@ -73,13 +76,23 @@ class EditActivity extends StatelessWidget {
                     "Imágenes",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
                   Row(
                     children: [
                       _buildImagePlaceholder(),
                       const SizedBox(width: 8),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Notas",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+                  ),
+                  const SizedBox(height: 8),
+                  // _buildTextField("Descripción", descriptionController,
+                  //  maxLines: 4),
+                  _buildTextField("Notas", notesController, maxLines: 4),
+                  const SizedBox(height: 8),
+
                   const SizedBox(height: 65), // Espacio en blanco
                 ],
               ),
@@ -94,7 +107,7 @@ class EditActivity extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Aquí irá la funcionalidad de guardar cambios
+                      _saveChanges(context);
                     },
                     label: const Text("Guardar Cambios"),
                     icon: const Icon(Icons.save),
@@ -116,6 +129,37 @@ class EditActivity extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Función para actualizar la actividad en Firebase
+  Future<void> _saveChanges(BuildContext context) async {
+    try {
+      // Obtener la referencia al documento de la actividad en Firebase
+      final activityRef =
+          FirebaseFirestore.instance.collection('activities').doc(activityId);
+
+      // Actualizar los campos en el documento
+      await activityRef.update({
+        'title': titleController.text,
+        'category': categoryController.text,
+        'description': descriptionController.text,
+        'notes': notesController.text,
+        'date_time':
+            Timestamp.fromDate(selectedDate), // Actualizar fecha y hora
+        'time': timeController.text, // Actualizar hora
+      });
+
+      // Mostrar mensaje de éxito y navegar hacia atrás
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Actividad actualizada exitosamente')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      // Manejar errores de la actualización
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar la actividad: $e')),
+      );
+    }
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
