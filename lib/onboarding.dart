@@ -178,7 +178,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
                         "Comenzar",
                         style: TextStyle(
                           fontSize: 18,
-                          color: const Color.fromARGB(255, 255, 255, 255),
+                          color: Color.fromARGB(255, 255, 255, 255),
                         ),
                       ),
                     )

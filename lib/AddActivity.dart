@@ -207,7 +207,7 @@ class _AddActivityState extends State<AddActivity> {
                       value: category["id"],
                       child: Text(category["name"]),
                     );
-                  }).toList(),
+                  }),
                   // Agregar un ítem especial para "Agregar Nueva Categoría"
                   const DropdownMenuItem<String>(
                     value: 'add_new',

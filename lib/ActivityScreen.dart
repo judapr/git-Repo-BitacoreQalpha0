@@ -23,28 +23,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
     activitiesStream = fetchUserActivities();
   }
 
-/*
-  // Función para obtener las actividades del usuario desde Firestore
-  Future<List<Map<String, dynamic>>> fetchUserActivities() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      throw Exception("No user logged in");
-    }
-
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('activities')
-        .where('user_id', isEqualTo: user.uid)
-        .orderBy('date_time', descending: true)
-        .get();
-
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data();
-      data['id'] = doc.id; // Agregar el ID del documento
-      return data;
-    }).toList();
-  }*/
-
   // Función para obtener las actividades del usuario desde Firestore en tiempo real
   Stream<List<Map<String, dynamic>>> fetchUserActivities() {
     final user = FirebaseAuth.instance.currentUser;
@@ -59,12 +37,40 @@ class _ActivityScreenState extends State<ActivityScreen> {
         .where('user_id', isEqualTo: user.uid)
         .orderBy('date_time', descending: true)
         .snapshots()
-        .map((querySnapshot) {
-      return querySnapshot.docs.map((doc) {
+        .asyncMap((querySnapshot) async {
+      final activities = querySnapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id; // Agregar el ID del documento
         return data;
       }).toList();
+
+      // Crear una lista de IDs únicos de categorías
+      final categoryIds = activities
+          .map((activity) => activity['category_id'] as String?)
+          .where((id) => id != null)
+          .toSet();
+
+      // Consultar nombres de las categorías en Firestore
+      final categoryNames = <String, String>{};
+      if (categoryIds.isNotEmpty) {
+        final categoriesQuery = await FirebaseFirestore.instance
+            .collection('categories')
+            .where(FieldPath.documentId, whereIn: categoryIds.toList())
+            .get();
+
+        for (var doc in categoriesQuery.docs) {
+          categoryNames[doc.id] = doc.data()['name'] as String;
+        }
+      }
+
+      // Reemplazar `category_id` por el nombre real en las actividades
+      for (var activity in activities) {
+        final categoryId = activity['category_id'] as String?;
+        activity['category_name'] =
+            categoryNames[categoryId] ?? "Categoría desconocida";
+      }
+
+      return activities;
     });
   }
 
@@ -122,15 +128,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           (activity['description'] ?? "").trim();
                       final String notes = (activity['notes'] ?? "").trim();
                       final String title = (activity['title'] ?? "").trim();
-                      final String category_id =
-                          (activity['category_id'] ?? "").trim();
+                      final String categoryName =
+                          (activity['category_name'] ?? "").trim();
                       return ActivityCard(
                         title: title.isEmpty
                             ? "No hay título" // Valor predeterminado
                             : title,
-                        category: category_id.isEmpty
+                        category: categoryName.isEmpty
                             ? "No hay categoría" // Valor predeterminado
-                            : category_id,
+                            : categoryName,
                         description: description.isEmpty
                             ? "No hay descripción disponible"
                             : description,
@@ -151,25 +157,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
           );
         },
       ),
-      /*
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Navegar a la pantalla de agregar actividad
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddActivity()),
-          );
-
-          // Refrescar actividades si se agregó una nueva
-          if (result == true) {
-            setState(() {
-              // Se vuelve a llamar a _refreshActivities para actualizar el Future
-              _refreshActivities(); // Recarga el Future
-            });
-          }
-        },
-        child: const Icon(Icons.add),
-      ),*/
     );
   }
 }
