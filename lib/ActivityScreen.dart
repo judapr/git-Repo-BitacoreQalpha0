@@ -1,11 +1,12 @@
-import 'MainAppBar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'MainAppBar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'ActivitySection.dart';
 import 'ActivityCard.dart';
-import 'AddActivity.dart';
 import 'package:intl/intl.dart';
+import 'AboutUsScreen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -75,9 +76,38 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   // Función para formatear la fecha
-  String formatDate(DateTime dateTime) {
-    final DateFormat formatter = DateFormat('d MMMM yyyy', 'es_ES');
-    return formatter.format(dateTime);
+  String formatDateWithContext(DateTime date) {
+    initializeDateFormatting('es_ES', null);
+
+    final now = DateTime.now();
+    final difference = now.difference(date).inDays;
+
+    if (difference == 0) {
+      return "Hoy";
+    } else if (difference == 1) {
+      return "Ayer";
+    } else if (difference == 2) {
+      return "Antier";
+    } else if (difference > 2 && difference <= 7) {
+      return "Hace $difference días";
+    } else {
+      return DateFormat("d MMM yyyy", 'es_ES').format(date);
+    }
+  }
+
+  // Función para obtener los datos del usuario desde Firestore
+  Future<Map<String, dynamic>> getUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      return doc.data() as Map<String, dynamic>;
+    } else {
+      return {};
+    }
   }
 
   @override
@@ -85,6 +115,63 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: MainAppBar(),
+      drawer: Drawer(
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: getUserData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(child: Text("Error al cargar los datos"));
+            }
+
+            Map<String, dynamic> user = snapshot.data ?? {};
+
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                UserAccountsDrawerHeader(
+                  accountName: Text(user['name'] ?? 'Nombre del Usuario'),
+                  accountEmail: Text(user['email'] ?? 'correo@ejemplo.com'),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      (user['name'] != null && user['name']!.isNotEmpty)
+                          ? user['name']![0]
+                          : 'N',
+                      style: const TextStyle(fontSize: 24, color: Colors.black),
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About Us'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AboutUsScreen()),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Cerrar Sesión'),
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: fetchUserActivities(),
         builder: (context, snapshot) {
@@ -103,13 +190,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
           }
 
           // Agrupar actividades por fecha
-          final groupedActivities = <String, List<Map<String, dynamic>>>{};
+          final groupedActivities = <DateTime, List<Map<String, dynamic>>>{};
           for (var activity in activities) {
             final date = (activity['date_time'] as Timestamp).toDate();
-            final formattedDate = "${date.day}-${date.month}-${date.year}";
+            final onlyDate = DateTime(date.year, date.month, date.day);
 
-            groupedActivities.putIfAbsent(formattedDate, () => []);
-            groupedActivities[formattedDate]!.add(activity);
+            groupedActivities.putIfAbsent(onlyDate, () => []);
+            groupedActivities[onlyDate]!.add(activity);
           }
 
           return SingleChildScrollView(
@@ -122,7 +209,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   final activityList = entry.value;
 
                   return ActivitySection(
-                    title: date,
+                    title: formatDateWithContext(date), // Formato síncrono aquí
                     activities: activityList.map((activity) {
                       final String description =
                           (activity['description'] ?? "").trim();

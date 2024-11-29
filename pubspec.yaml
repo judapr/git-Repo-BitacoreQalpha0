@@ -28,7 +28,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets: 
-    - assets/login/logoBQLogin.jpg
+    - assets/BitacoreQLogo.png
+    - assets/BitacoreQicon.png
 
 
 

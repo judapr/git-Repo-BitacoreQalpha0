@@ -1,15 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 import 'ActivityScreen.dart';
 import 'LoginScreen.dart';
+import 'AboutUsScreen.dart';
 import 'RegisterScreen.dart';
 import 'authGuard.dart';
 import 'onboarding.dart';
 
 void main() async {
+  //WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_ES', null);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -44,6 +48,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
+        '/about': (context) => const AboutUsScreen(),
         '/activity': (context) =>
             const AuthGuard(child: ActivityScreen()), // Protección
       },

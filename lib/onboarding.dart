@@ -40,18 +40,20 @@ class _MyOnboardingState extends State<MyOnboarding> {
                   mainAxisSize:
                       MainAxisSize.min, // Ajusta la columna al contenido
                   children: [
+                    //Icon(Icons.assignment_turned_in_sharp),
                     // Imagen ajustable
+
                     Image(
                       image: AssetImage(
-                          'assets/images/agenda1.JPG'), // Ruta de la imagen en tu proyecto
-                      height: 550, // Altura ajustable
-                      width: 450, // Ancho ajustable
+                          'BitacoreQLogo.png'), // Ruta de la imagen en tu proyecto
+                      height: 200, // Altura ajustable
+                      //width: 450, // Ancho ajustable
                       fit: BoxFit.cover, // Ajuste de la imagen
                     ),
                     SizedBox(
                         height: 16), // Espaciado entre la imagen y el texto
                     // Títulos
-                    Text(
+                    /*                    Text(
                       'Bienvenido a BitacoreQ',
                       style: TextStyle(
                         fontSize: 24,
@@ -59,7 +61,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
                         color: Color.fromARGB(255, 3, 3, 3),
                       ),
                       textAlign: TextAlign.center,
-                    ),
+                    ),*/
                     SizedBox(height: 16), // Espaciado entre los textos
                     Text(
                       'Lleva un registro de tus actividades díarias de manera ordenada.',
@@ -80,14 +82,16 @@ class _MyOnboardingState extends State<MyOnboarding> {
                   mainAxisSize:
                       MainAxisSize.min, // Ajusta la columna al contenido
                   children: [
+                    Icon(Icons.view_agenda_outlined),
                     // Imagen ajustable
+                    /*
                     Image(
                       image: AssetImage(
                           'assets/images/agenda2.JPG'), // Ruta de la imagen en tu proyecto
                       height: 550, // Altura ajustable
                       width: 550, // Ancho ajustable
                       fit: BoxFit.cover, // Ajuste de la imagen
-                    ),
+                    ),*/
                     SizedBox(
                         height: 16), // Espaciado entre la imagen y el texto
                     // Títulos
@@ -101,6 +105,15 @@ class _MyOnboardingState extends State<MyOnboarding> {
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 16), // Espaciado entre los textos
+                    Text(
+                      'Manten el Control',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 3, 3, 3),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                     Text(
                       'Registra tus actividades diarias, realiza un seguimiento por día, por hora y  por categoría.',
                       style: TextStyle(
@@ -120,14 +133,17 @@ class _MyOnboardingState extends State<MyOnboarding> {
                   mainAxisSize:
                       MainAxisSize.min, // Ajusta la columna al contenido
                   children: [
+                    const Icon(Icons.hexagon_outlined),
                     // Imagen ajustable
+                    /*
                     const Image(
+                      
                       image: AssetImage(
                           'assets/images/agenda2.JPG'), // Ruta de la imagen en tu proyecto
                       height: 450, // Altura ajustable
                       width: 400, // Ancho ajustable
                       fit: BoxFit.cover, // Ajuste de la imagen
-                    ),
+                    ),*/
                     const SizedBox(
                         height: 16), // Espaciado entre la imagen y el texto
                     // Títulos

@@ -110,7 +110,7 @@ class EditActivity extends StatelessWidget {
                       _saveChanges(context);
                     },
                     label: const Text("Guardar Cambios"),
-                    icon: const Icon(Icons.save),
+                    //icon: const Icon(Icons.save),
                     style: ElevatedButton.styleFrom(
                       textStyle: const TextStyle(fontSize: 14),
                       padding: const EdgeInsets.symmetric(
