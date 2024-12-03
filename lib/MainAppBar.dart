@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'AddActivity.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String buttonText; // Texto del botón
@@ -32,7 +31,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         const Spacer(
           flex: 1,
         ),
-        const Icon(Icons.hexagon_outlined),
+        // const Icon(Icons.hexagon_outlined),
         const Spacer(
           flex: 5,
         ),

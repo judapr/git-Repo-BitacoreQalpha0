@@ -45,7 +45,7 @@ class _MyOnboardingState extends State<MyOnboarding> {
 
                     Image(
                       image: AssetImage(
-                          'BitacoreQLogo.png'), // Ruta de la imagen en tu proyecto
+                          'assets/BitacoreQLogo.png'), // Ruta de la imagen en tu proyecto
                       height: 200, // Altura ajustable
                       //width: 450, // Ancho ajustable
                       fit: BoxFit.cover, // Ajuste de la imagen

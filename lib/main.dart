@@ -18,7 +18,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp()); // No necesitamos pasar 'hasSeenOnboarding' aquí
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

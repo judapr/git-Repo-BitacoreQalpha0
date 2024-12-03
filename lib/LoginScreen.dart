@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.topCenter,
                   child: Image.asset(
-                    'BitacoreQLogo.png',
+                    'assets/BitacoreQLogo.png',
                     width: 120,
                     height: 120,
                   ),

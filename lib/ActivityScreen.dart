@@ -91,7 +91,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     } else if (difference > 2 && difference <= 7) {
       return "Hace $difference días";
     } else {
-      return DateFormat("d MMM yyyy", 'es_ES').format(date);
+      return DateFormat("d MMM',' yyyy", 'es_ES').format(date);
     }
   }
 
@@ -114,7 +114,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: MainAppBar(),
+      appBar: const MainAppBar(),
       drawer: Drawer(
         child: FutureBuilder<Map<String, dynamic>>(
           future: getUserData(),
@@ -124,7 +124,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             }
 
             if (snapshot.hasError) {
-              return Center(child: Text("Error al cargar los datos"));
+              return const Center(child: Text("Error al cargar los datos"));
             }
 
             Map<String, dynamic> user = snapshot.data ?? {};
