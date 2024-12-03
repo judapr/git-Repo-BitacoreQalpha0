@@ -1,3 +1,4 @@
+//TODO: arreglar bug categoría en esta vista
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'MainAppBar.dart';
 import 'package:flutter/material.dart';

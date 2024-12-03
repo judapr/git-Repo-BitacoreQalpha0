@@ -75,6 +75,33 @@ class AboutUsScreen extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(height: 32), // Espaciado antes de la nueva sección
+            const Text(
+              "Versión de la App",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Card(
+              elevation: 3,
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: ListTile(
+                leading: Icon(Icons.info_outline, color: Colors.black87),
+                title: Text(
+                  'Versión alpha.1.13',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'La versión inicial de nuestra aplicación.',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
           ],
         ),
       ),
