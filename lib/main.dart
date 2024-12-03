@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           }
 
           // Si el usuario no está autenticado, muestra el onboarding
-          return const MyOnboarding(); // Siempre muestra el onboarding si no está autenticado
+          return const MyOnboarding(); // Siempre muestra el onboarding si no está autenticado.
         },
       ),
       routes: {
