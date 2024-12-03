@@ -94,12 +94,15 @@ class ActivityDetailScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
+                          const Spacer(
+                            flex: 1,
+                          ),
+                          /*IconButton(
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                          ),
+                          ),*/
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [

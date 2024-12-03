@@ -31,7 +31,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         const Spacer(
           flex: 1,
         ),
-        // const Icon(Icons.hexagon_outlined),
+        //const Icon(Icons.hexagon_outlined),
         const Spacer(
           flex: 5,
         ),

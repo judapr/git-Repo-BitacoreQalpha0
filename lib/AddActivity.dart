@@ -74,15 +74,18 @@ class _AddActivityState extends State<AddActivity> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
+                        Spacer(
+                          flex: 1,
+                        ),
+                        /*IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                        ),
+                        ),*/
                       ],
                     ),
                     const Text(
